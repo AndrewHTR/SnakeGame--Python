@@ -1,4 +1,4 @@
-#Jogo da Cobrinha
+# Jogo da Cobrinha
 
 Jogo feito usando a biblioteca pygame do python.
 
