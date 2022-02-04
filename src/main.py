@@ -1,11 +1,13 @@
 import random
 import pygame
 import time
+import os
 
 def Main():
 
     #! Importante:
     pygame.init()
+    pygame.mixer.init()
 
     display_width = 800
     display_height = 600
@@ -15,6 +17,8 @@ def Main():
 
     game_over = False
     game_close = False
+
+    frame = 15 
 
     clock = pygame.time.Clock()
 
@@ -31,7 +35,7 @@ def Main():
     
     def cobra(corpo_cobra):
         for x in corpo_cobra:
-            pygame.draw.rect(display, green, [x[0], x[1], 20, 20])
+            pygame.draw.rect(display, green, [x[0], x[1], 30, 30])
 
     #! Dados do jogo:
     # Cores
@@ -53,6 +57,18 @@ def Main():
     corpo_cobra = []
     tamanho_cobra = 1
 
+    #! Som:
+    s = ".\\src\\audio"
+    comer = pygame.mixer.Sound(os.path.join(s, 'comer.wav'))
+    comer.set_volume(0.5)
+    ost = pygame.mixer.Sound(os.path.join(s, "ost.wav"))
+    ost.set_volume(0.01)
+    gameover = pygame.mixer.Sound(os.path.join(s, "gameover.wav"))
+    gameover.set_volume(0.01)
+
+    poderx = round(random.randrange(0, display_width - velocidade) / 10.0) * 10.0
+    podery = round(random.randrange(0, display_height - velocidade) / 10.0) * 10.0
+
     foodx = round(random.randrange(0, display_width - velocidade) / 10.0) * 10.0
     foody = round(random.randrange(0, display_height - velocidade) / 10.0) * 10.0
 
@@ -61,6 +77,7 @@ def Main():
         while game_close == True:
             display.fill(black)
             mensagem("Você perdeu :( Aperte S-Sair ou C-Continuar", white)
+            #pygame.mixer.Sound.play(gameover)
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -71,6 +88,7 @@ def Main():
                     if event.key == pygame.K_c:
                         time.sleep(1)
                         Main()
+            
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -89,7 +107,10 @@ def Main():
                 if event.key == pygame.K_DOWN:
                     x1_change = 0
                     y1_change = velocidade
+                if event.key == pygame.K_r:
+                    Main()
                 print(event)
+        
         display.fill(black)
 
         cabeca_cobra = []
@@ -106,25 +127,41 @@ def Main():
 
         if x1 >= display_width or x1 < 0 or y1 >= display_height or y1 < 0:
             game_close = True
+
         if x1 == foodx and y1 == foody:
             foodx = round(random.randrange(0, display_width - velocidade) / 10.0) * 10.0
             foody = round(random.randrange(0, display_height - velocidade) / 10.0) * 10.0
-            print("aa") 
+            
             pontos += 1
             tamanho_cobra += 1
             
-
+            pygame.mixer.Sound.play(comer)
+        dt = clock.tick()
+        if x1 == poderx and y1 == podery:
+            poderx = round(random.randrange(0, display_width - velocidade) / 10.0) * 10.0
+            podery = round(random.randrange(0, display_height - velocidade) / 10.0) * 10.0
+            pygame.mixer.Sound.play(comer, 0)
+            frame = 40
+             
+            tempo = 0
+            frame = 40
+            tempo += dt   
+            if tempo >= 3000:
+                frame = 15     
+            
         x1 += x1_change 
         y1 += y1_change       
 
         #! Update da tela:
         score(pontos,blue)
+        pygame.draw.rect(display, blue, [poderx, podery, 10, 10])
         pygame.draw.rect(display, red, [foodx, foody, 10, 10])
         cobra(corpo_cobra)
         pygame.display.update()
 
-        clock.tick(15)
+        clock.tick(frame)
 
+    
     pygame.quit()
     quit()
 Main()
